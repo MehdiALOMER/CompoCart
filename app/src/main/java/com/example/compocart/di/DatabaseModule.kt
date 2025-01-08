@@ -2,6 +2,7 @@ package com.example.compocart.di
 
 import android.content.Context
 import androidx.room.Room
+import com.example.compocart.data.datasource.local.dao.AuthTokenDao
 import com.example.compocart.data.local.database.AppDatabase
 import com.example.compocart.data.local.dao.ProductDao
 import dagger.Module
@@ -17,9 +18,23 @@ object DatabaseModule {
 
     @Singleton
     @Provides
-    fun provideDatabase(@ApplicationContext context: Context): AppDatabase =
-        Room.databaseBuilder(context, AppDatabase::class.java, "compocart_db").build()
+    fun provideDatabase(@ApplicationContext context: Context): AppDatabase {
+        return Room.databaseBuilder(
+            context,
+            AppDatabase::class.java,
+            "compocart.db"
+        )
+            .fallbackToDestructiveMigration()
+            .build()
+    }
 
     @Provides
+    @Singleton
     fun provideProductDao(database: AppDatabase): ProductDao = database.productDao()
+
+    @Provides
+    @Singleton
+    fun provideAuthTokenDao(database: AppDatabase): AuthTokenDao {
+        return database.authTokenDao()
+    }
 }

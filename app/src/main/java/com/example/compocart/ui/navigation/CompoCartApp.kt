@@ -18,12 +18,18 @@ import com.example.compocart.ui.screens.SettingsScreen
 import com.example.compocart.ui.screens.categories.CategoryScreen
 import com.example.compocart.ui.screens.home.HomeViewModel
 import com.example.compocart.ui.screens.product.ProductDetailScreen
+import com.example.compocart.ui.screens.LoginScreen
 
 @Composable
 fun CompoCartApp() {
     val navController = rememberNavController()
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
+
+
+    val showBottomBar = currentRoute != "login" && !(currentRoute?.startsWith("product/") ?: false)
+
+
 
 //    var drawerState = remember { mutableStateOf(false) } // Yan menü açılıp kapanma durumu
 
@@ -36,49 +42,63 @@ fun CompoCartApp() {
 //            })
 //        }
 //    ) {
-        Scaffold(
+    Scaffold(
 //            bottomBar = { BottomNavigationBar(navController) }
-            bottomBar = {
-                if (currentRoute != null && currentRoute != "product/{productId}") {
+        bottomBar = {
+            if (showBottomBar) {
                 BottomNavigationBar(navController)
-            }}
-        ) { innerPadding ->
-            NavHost(
-                navController = navController,
-                startDestination = "home",
-                modifier = Modifier.padding(innerPadding)
-            ) {
-                composable("home") {
-                    HomeScreen(
-                        onCategoryClick = { category ->
-                            navController.navigate("category/$category")
-                        },
-                        onProductClick = { product ->
-                            navController.navigate("product/${product.id}")
-                        }
-                    )
-                }
-
-                composable("categories") {
-                    CategoryScreen(onCategoryClick = { category ->
-                        // Kategori tıklama olayını burada işleyin, örneğin:
-                        println("Clicked on: ${category.name}")
-                    })
-                }
-                composable("cart") { CartScreen() }
-                composable("settings") { SettingsScreen() }
-                composable("profile") { ProfileScreen() }
-
-                composable("product/{productId}") { backStackEntry ->
-                    val productId = backStackEntry.arguments?.getString("productId")?.toIntOrNull()
-                    val parentEntry = remember(backStackEntry) {
-                        navController.getBackStackEntry("home")
-                    }
-                    val homeViewModel: HomeViewModel = hiltViewModel(parentEntry)
-                    ProductDetailScreen(productId = productId, viewModel = homeViewModel)
-                }
             }
         }
+    ) { innerPadding ->
+        NavHost(
+            navController = navController,
+            startDestination = "login",
+            modifier = Modifier.padding(innerPadding)
+        ) {
+            composable("login") {
+                LoginScreen(
+                    onNavigateToHome = {
+                        navController.navigate("home") {
+                            popUpTo("login") {
+                                inclusive = true
+                            } // Geri tuşunda login ekranına dönülmemesi için ( Giriş ekranını stack'ten kaldırır)
+                            launchSingleTop = true // "home" ekranını birden fazla kez yüklemez
+                        }
+                    }
+                )
+            }
+
+            composable("home") {
+                HomeScreen(
+                    onCategoryClick = { category ->
+                        navController.navigate("category/$category")
+                    },
+                    onProductClick = { product ->
+                        navController.navigate("product/${product.id}")
+                    }
+                )
+            }
+
+            composable("categories") {
+                CategoryScreen(onCategoryClick = { category ->
+                    // Kategori tıklama olayını burada işleyin, örneğin:
+                    println("Clicked on: ${category.name}")
+                })
+            }
+            composable("cart") { CartScreen() }
+            composable("settings") { SettingsScreen() }
+            composable("profile") { ProfileScreen() }
+
+            composable("product/{productId}") { backStackEntry ->
+                val productId = backStackEntry.arguments?.getString("productId")?.toIntOrNull()
+                val parentEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry("home")
+                }
+                val homeViewModel: HomeViewModel = hiltViewModel(parentEntry)
+                ProductDetailScreen(productId = productId, viewModel = homeViewModel)
+            }
+        }
+    }
 //    }
 }
 
