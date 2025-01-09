@@ -13,12 +13,13 @@ import androidx.navigation.compose.rememberNavController
 import com.example.compocart.ui.components.BottomNavigationBar
 import com.example.compocart.ui.screens.CartScreen
 import com.example.compocart.ui.screens.home.HomeScreen
-import com.example.compocart.ui.screens.ProfileScreen
+import com.example.compocart.ui.screens.profile.ProfileScreen
 import com.example.compocart.ui.screens.SettingsScreen
 import com.example.compocart.ui.screens.categories.CategoryScreen
 import com.example.compocart.ui.screens.home.HomeViewModel
 import com.example.compocart.ui.screens.product.ProductDetailScreen
 import com.example.compocart.ui.screens.LoginScreen
+import com.example.compocart.ui.screens.profile.ProfileViewModel
 
 @Composable
 fun CompoCartApp() {
@@ -87,7 +88,10 @@ fun CompoCartApp() {
             }
             composable("cart") { CartScreen() }
             composable("settings") { SettingsScreen() }
-            composable("profile") { ProfileScreen() }
+            composable("profile") {
+                val profileViewModel = hiltViewModel<ProfileViewModel>()
+                ProfileScreen(viewModel = profileViewModel)
+            }
 
             composable("product/{productId}") { backStackEntry ->
                 val productId = backStackEntry.arguments?.getString("productId")?.toIntOrNull()

@@ -23,7 +23,8 @@ class AuthRepository @Inject constructor(
             println("LoginUser: response received -> ${response.body()}")
 
             if (token != null) {
-                authTokenDao.insertToken(AuthToken(accessToken = token))
+                authTokenDao.deleteToken() // Eski token'ları sil
+                authTokenDao.insertToken(AuthToken(accessToken = token)) // Yeni token'ı kaydet
                 println("LoginUser: Token saved to Room -> $token")
             }
             else {
