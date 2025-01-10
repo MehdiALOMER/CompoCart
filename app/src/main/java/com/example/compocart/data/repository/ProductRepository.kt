@@ -14,11 +14,35 @@ class ProductRepository @Inject constructor(
         val response = apiService.getProducts()
         return response.products
     }
+
+    // API'den ürünleri çek ve favori durumunu eşleştir
+    suspend fun syncProductsWithFavorites() {
+        val apiProducts = apiService.getProducts().products // API'den ürünler
+        val localProducts = productDao.getAllProductsOnce() // Room'daki mevcut ürünler
+
+        // Favori durumunu eşleştir
+        val updatedProducts = apiProducts.map { apiProduct ->
+            val localProduct = localProducts.find { it.id == apiProduct.id }
+            if (localProduct != null) {
+                // Eğer ürün Room'da varsa, `isFavorite` durumunu koru
+                apiProduct.copy(isFavorite = localProduct.isFavorite)
+            } else {
+                // Eğer ürün Room'da yoksa, varsayılan `isFavorite` durumunu false olarak setle
+                apiProduct.copy(isFavorite = false)
+            }
+        }
+
+        // Güncellenmiş ürünleri Room veritabanına kaydet
+        productDao.insertProducts(updatedProducts)
+    }
+
+    // Room'dan tüm ürünleri al
     fun getLocalProducts(): Flow<List<Product>> = productDao.getAllProducts()
 
-    suspend fun insertProduct(product: Product) = productDao.insertProduct(product)
-
-    suspend fun deleteProduct(product: Product) = productDao.deleteProduct(product)
+    // Belirli bir ürünü favorilere ekle
+    suspend fun updateFavoriteStatus(productId: Int, isFavorite: Boolean) {
+        productDao.updateFavoriteStatus(productId, isFavorite)
+    }
 
 
     suspend fun searchProducts(query: String): List<Product> {

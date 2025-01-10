@@ -26,23 +26,23 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.compocart.R
 import com.example.compocart.data.model.Product
+import com.example.compocart.ui.screens.favorite.FavoritesViewModel
 import com.example.compocart.ui.screens.home.HomeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProductDetailScreen(productId: Int?, viewModel: HomeViewModel) {
-    var selectedColor by remember { mutableStateOf(Color.Red) }
-    var selectedSize by remember { mutableStateOf(7) }
-    var quantity by remember { mutableStateOf(1) }
-    var isFavorite by remember { mutableStateOf(false) }
-
+fun ProductDetailScreen(
+    productId: Int?,
+    homeViewModel: HomeViewModel,
+    favoritesViewModel: FavoritesViewModel
+) {
     if (productId == null) {
         Text("Product not found")
         return
     }
 
     // Ürünleri ViewModel'den al
-    val products = viewModel.products.collectAsState().value
+    val products = homeViewModel.products.collectAsState().value
     val product = products.find { it.id == productId }
 
     if (product == null) {
@@ -50,15 +50,13 @@ fun ProductDetailScreen(productId: Int?, viewModel: HomeViewModel) {
         return
     }
 
+    // `isFavorite` durumunu ViewModel'den kontrol et
+    val isFavorite = remember { mutableStateOf(product.isFavorite) }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(text = "Product Details") },
-                navigationIcon = {
-//                    IconButton(onClick = { /* Navigate back */ }) {
-//                        Icon(painter = painterResource(R.drawable.ic_back), contentDescription = "Back")
-//                    }
-                },
                 actions = {
                     IconButton(onClick = { /* Navigate to cart */ }) {
                         Icon(Icons.Filled.ShoppingCart, contentDescription = "Cart")
@@ -66,7 +64,6 @@ fun ProductDetailScreen(productId: Int?, viewModel: HomeViewModel) {
                 }
             )
         },
-        // Add to Cart Section
         bottomBar = {
             Row(
                 modifier = Modifier
@@ -80,18 +77,6 @@ fun ProductDetailScreen(productId: Int?, viewModel: HomeViewModel) {
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(text = "Add to Cart")
-                }
-                Spacer(modifier = Modifier.width(16.dp))
-                OutlinedButton(onClick = { if (quantity > 1) quantity-- }) {
-                    Text(text = "-")
-                }
-                Text(
-                    text = quantity.toString(),
-                    modifier = Modifier.padding(horizontal = 8.dp),
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                OutlinedButton(onClick = { quantity++ }) {
-                    Text(text = "+")
                 }
             }
         }
@@ -124,9 +109,13 @@ fun ProductDetailScreen(productId: Int?, viewModel: HomeViewModel) {
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1f)
                 )
-                IconButton(onClick = { isFavorite = !isFavorite }) {
+                IconButton(onClick = {
+                    isFavorite.value = !isFavorite.value
+                    // Favori durumu ViewModel'e kaydedilir
+                    favoritesViewModel.toggleFavorite(product.id, isFavorite.value)
+                }) {
                     Icon(
-                        imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                        imageVector = if (isFavorite.value) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
                         contentDescription = "Favorite"
                     )
                 }
@@ -151,39 +140,6 @@ fun ProductDetailScreen(productId: Int?, viewModel: HomeViewModel) {
                     color = if (product.stock > 0) Color.Green else Color.Red,
                     style = MaterialTheme.typography.bodyMedium
                 )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Color Selection
-            Text(text = "Colors:", fontWeight = FontWeight.Bold)
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(product.tags.size) { index ->
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .padding(4.dp)
-                            .background(
-                                color = Color(product.tags[index].hashCode()),
-                                shape = CircleShape
-                            )
-                            .clickable { selectedColor = Color(product.tags[index].hashCode()) }
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Size Selection
-            Text(text = "Available Sizes:", fontWeight = FontWeight.Bold)
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(product.tags.size) { index ->
-                    OutlinedButton(onClick = {
-                        selectedSize = product.tags[index].toIntOrNull() ?: 0
-                    }) {
-                        Text(text = product.tags[index])
-                    }
-                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))

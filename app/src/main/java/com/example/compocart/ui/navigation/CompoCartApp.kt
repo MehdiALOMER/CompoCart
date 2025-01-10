@@ -19,6 +19,7 @@ import com.example.compocart.ui.screens.categories.CategoryScreen
 import com.example.compocart.ui.screens.home.HomeViewModel
 import com.example.compocart.ui.screens.product.ProductDetailScreen
 import com.example.compocart.ui.screens.LoginScreen
+import com.example.compocart.ui.screens.favorite.FavoritesViewModel
 import com.example.compocart.ui.screens.profile.ProfileViewModel
 
 @Composable
@@ -29,7 +30,6 @@ fun CompoCartApp() {
 
 
     val showBottomBar = currentRoute != "login" && !(currentRoute?.startsWith("product/") ?: false)
-
 
 
 //    var drawerState = remember { mutableStateOf(false) } // Yan menü açılıp kapanma durumu
@@ -98,8 +98,13 @@ fun CompoCartApp() {
                 val parentEntry = remember(backStackEntry) {
                     navController.getBackStackEntry("home")
                 }
-                val homeViewModel: HomeViewModel = hiltViewModel(parentEntry)
-                ProductDetailScreen(productId = productId, viewModel = homeViewModel)
+                val homeViewM: HomeViewModel = hiltViewModel(parentEntry)
+                val favoritesViewM: FavoritesViewModel = hiltViewModel(parentEntry)
+                ProductDetailScreen(
+                    productId = productId,
+                    homeViewModel = homeViewM,
+                    favoritesViewModel = favoritesViewM
+                )
             }
         }
     }

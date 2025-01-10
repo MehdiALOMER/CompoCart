@@ -9,7 +9,7 @@ import com.example.compocart.data.local.dao.ProductDao
 import com.example.compocart.data.model.AuthToken
 import com.example.compocart.data.model.Product
 
-@Database(entities = [Product::class, AuthToken::class], version = 2, exportSchema = false)
+@Database(entities = [Product::class, AuthToken::class], version = 3, exportSchema = false)
 @TypeConverters(StringListConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun productDao(): ProductDao

@@ -30,6 +30,16 @@ class HomeViewModel @Inject constructor(
     init {
         fetchCategories()
         fetchProducts()
+        syncProducts()
+    }
+
+    private fun syncProducts() {
+        viewModelScope.launch {
+            productRepository.syncProductsWithFavorites()
+            productRepository.getLocalProducts().collect { productList ->
+                _products.value = productList
+            }
+        }
     }
 
     private fun fetchCategories() {

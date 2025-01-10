@@ -26,4 +26,8 @@ data class Product(
     val returnPolicy: String?, // İade politikası
     val images: List<String> = emptyList(), // Ürün görselleri
     val thumbnail: String?, // Küçük resim
+
+
+    // Favorilere ekleme durumu
+    val isFavorite: Boolean = false // Varsayılan olarak false
 )

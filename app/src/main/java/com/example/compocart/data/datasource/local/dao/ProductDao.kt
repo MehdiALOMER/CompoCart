@@ -9,9 +9,12 @@ interface ProductDao {
     @Query("SELECT * FROM products")
     fun getAllProducts(): Flow<List<Product>>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertProduct(product: Product)
+    @Query("SELECT * FROM products")
+    suspend fun getAllProductsOnce(): List<Product> // Tüm ürünleri Flow yerine List olarak getir
 
-    @Delete
-    suspend fun deleteProduct(product: Product)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertProducts(products: List<Product>)
+
+    @Query("UPDATE products SET isFavorite = :isFavorite WHERE id = :productId")
+    suspend fun updateFavoriteStatus(productId: Int, isFavorite: Boolean)
 }
